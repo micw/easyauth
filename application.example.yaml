@@ -1,0 +1,19 @@
+---
+
+###
+# example config for local development
+
+userProvider: static
+
+static:
+  users: |
+    admin:Administrator:admin@example.com:{plain}password:group1,group2,group3
+    user:User:user@example.com:{plain}password:group3
+
+#ldap:
+#  serverUrl: ldaps://ldap.example.com
+#  baseDn: dc=example,dc=com
+#  bindDn: cn=ldapuser,dc=example,dc=com
+#  bindPassword: s3cr3t!
+#  additionalUsersDn: ou=Users
+#  additionalGroupsDn: ou=Groups

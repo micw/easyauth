@@ -1,0 +1,10 @@
+---
+
+ldap:
+  usersFilter: (&(|({usernameAttribute}={username})({emailAttribute}={username}))(objectClass=person))
+  displayNameAttribute: cn
+  usernameAttribute: uid
+  groupNameAttribute: cn
+  emailAttribute: mail
+  
+  groupsFilter: (uniqueMember={userDn})
