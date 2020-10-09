@@ -14,7 +14,7 @@
 		<java.version>11</java.version>
 		<maven.install.skip>true</maven.install.skip>
 		<maven.deploy.skip>true</maven.deploy.skip>
-		<spring.boot.maven.skip>true</spring.boot.maven.skip>
+		<spring.boot.maven.skip>false</spring.boot.maven.skip>
 		<build.docker.skip>false</build.docker.skip>
 		<build.docker.image>micwy/easyauth</build.docker.image>
 		<build.docker.tag>latest</build.docker.tag>
@@ -87,13 +87,6 @@
 				<artifactId>jib-maven-plugin</artifactId>
 				<version>2.2.0</version>
 				<executions>
-					<execution>
-						<id>docker-install</id>
-						<phase>install</phase>
-						<goals>
-							<goal>dockerBuild</goal>
-						</goals>
-					</execution>
 					<execution>
 						<id>docker-deploy</id>
 						<phase>deploy</phase>
