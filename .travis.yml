@@ -1,0 +1,8 @@
+language: java
+
+jdk:
+  - openjdk11
+
+script:
+  - echo "$DOCKER_HUB_TOKEN" | docker login -u "micwy" --password-stdin
+  - mvn deploy
