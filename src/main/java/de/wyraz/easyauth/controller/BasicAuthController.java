@@ -5,6 +5,8 @@ import java.util.Base64;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.logging.log4j.util.Strings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,12 +16,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import de.wyraz.easyauth.model.AuthException;
 import de.wyraz.easyauth.model.AuthException.ErrorCode;
-import de.wyraz.easyauth.provider.IUserProvider;
-import de.wyraz.easyauth.provider.ldap.LdapUserProvider;
 import de.wyraz.easyauth.model.User;
+import de.wyraz.easyauth.provider.IUserProvider;
 
 @Controller
 public class BasicAuthController {
+	
+	protected final Logger LOG=LoggerFactory.getLogger(getClass());
 	
 	@Autowired
 	protected IUserProvider userProvider;
@@ -48,6 +51,9 @@ public class BasicAuthController {
 			} catch (AuthException ex) {
 				errorCode=ex.getErrorCode();
 				errorCause=ex;
+				if (errorCode==ErrorCode.INTERNAL) {
+					LOG.warn("Authentication not possible due to internal error",ex);
+				}
 			}
 		}
 		
@@ -71,7 +77,7 @@ public class BasicAuthController {
 		try {
 			authHeader=new String(Base64.getDecoder().decode(authHeader));
 		} catch (IllegalArgumentException ex) {
-			// Log: invalid base64
+			LOG.warn("Invalid base64 encoding",ex);
 			return null;
 		}
 		String[] userAndPassword=authHeader.split(":",2);
