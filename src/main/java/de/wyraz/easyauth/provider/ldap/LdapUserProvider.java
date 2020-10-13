@@ -2,6 +2,7 @@ package de.wyraz.easyauth.provider.ldap;
 
 import java.net.URI;
 
+import javax.annotation.PostConstruct;
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocketFactory;
 
@@ -27,6 +28,8 @@ import de.wyraz.easyauth.provider.IUserProvider;
  * @author mwyraz
  */
 public class LdapUserProvider implements IUserProvider {
+	
+	protected final Logger LOG=LoggerFactory.getLogger(getClass());
 	
 	@Value("${ldap.serverUrl}")
 	protected URI serverUrl;
@@ -64,6 +67,21 @@ public class LdapUserProvider implements IUserProvider {
 	@Value("${ldap.additionalGroupsDn:}")
 	protected String additionalGroupsDn;
 	
+	@PostConstruct
+	protected void testConnection() {
+		try (LDAPConnection ldap=connect()) {
+			try {
+				ldap.bind(bindDn, bindPassword);
+			} catch (LDAPException ex) {
+				LOG.warn("Unable to authenticate to LDAP at {} as {}",serverUrl,bindDn,ex);
+			}
+		} catch (LDAPException ex) {
+			LOG.warn("Unable to connect to LDAP at {}",serverUrl,ex);
+		}
+		LOG.info("LDAP connection to {} as {} successfully validated.",serverUrl,bindDn);		
+		
+	}
+	
 	protected LDAPConnection connect() throws LDAPException {
 		int port=serverUrl.getPort();
 		SocketFactory socketFactory;
@@ -87,11 +105,10 @@ public class LdapUserProvider implements IUserProvider {
 		try (LDAPConnection ldap=connect()) {
 			LdapUser user=findUserByUsername(ldap, username);
 			if (user==null) {
-				// Log: user not found
-				throw new AuthException(ErrorCode.AUTHENTICATION_REQUIRED);
+				LOG.debug("Unable to find user {}",username);
 			}
 			try {
-				// Log: password wrong
+				LOG.debug("Wrong password for user {}",username);
 				ldap.bind(user.getDn(), password);
 			} catch (LDAPException ex) {
 				throw new AuthException(ErrorCode.AUTHENTICATION_REQUIRED, ex);
@@ -113,7 +130,7 @@ public class LdapUserProvider implements IUserProvider {
 			return null;
 		}
 		if (result.getEntryCount()>0) {
-			// warn that the name is ambigous
+			LOG.warn("Got more than one result for username {} - using first result",username);
 		}
 		SearchResultEntry e=result.getSearchEntries().get(0);
 		LdapUser user=new LdapUser(e.getDN());
